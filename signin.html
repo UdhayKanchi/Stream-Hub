@@ -5,28 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Removed Netflix favicon to stop 'Dangerous Site' warning -->
-    <!-- Add your own later: <link rel="icon" href="streamhub-icon.png"> -->
-    
+    <!-- Removed Netflix favicon -->
     <title>StreamHub Sign In</title>
 
-    <!-- Using the Font from your requested Design -->
     <style>
-        /* --- GLOBAL STYLES (From your design reference) --- */
+        /* --- GLOBAL STYLES --- */
         body {
-        /* SAFE: Generic Cinematic Background from Unsplash */
-        background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925&auto=format&fit=crop');
-        background-size: cover;
-        background-position: center;
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-        /* Dark Overlay (Slightly lighter in the design reference) */
+            /* Cinematic Background */
+            background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Dark Overlay */
         body::before {
             content: '';
             position: absolute;
@@ -38,7 +36,7 @@
             z-index: 1;
         }
 
-        /* --- AUTH BOX DESIGN (Applied your requested effects) --- */
+        /* --- AUTH BOX DESIGN --- */
         .auth-box {
             position: relative;
             background: rgba(22, 22, 22, 0.75);
@@ -59,32 +57,47 @@
             font-weight: 700;
         }
 
-        /* --- INPUTS (From your design reference) --- */
+        /* --- INPUTS --- */
         .input-group {
             margin-bottom: 16px;
+            position: relative; /* For the eye icon positioning */
         }
 
         .auth-box input {
             width: 100%;
             padding: 16px 20px;
             background: #333;
-            /* Dark grey input background */
             border: none;
             border-radius: 4px;
             color: white;
             font-size: 1rem;
-            transition: background 0.2s;
+            transition: background 0.2s, outline 0.2s;
             box-sizing: border-box;
-            /* Ensures padding doesn't affect width */
         }
 
         .auth-box input:focus {
-            outline: 2px solid #e50914;
-            /* Red outline on focus */
+            outline: none; /* Custom outline logic below */
             background: #454545;
+            box-shadow: 0 0 0 2px #e50914;
         }
 
-        /* --- BUTTON (Solid Red, Bold text) --- */
+        /* --- SHOW PASSWORD ICON --- */
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #b3b3b3;
+            user-select: none;
+            font-size: 1.2rem;
+        }
+        
+        .toggle-password:hover {
+            color: white;
+        }
+
+        /* --- BUTTON --- */
         .btn-signin {
             width: 100%;
             padding: 16px;
@@ -96,20 +109,26 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 24px;
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s, transform 0.1s, opacity 0.2s;
             box-shadow: 0 4px 10px rgba(229, 9, 20, 0.3);
         }
 
         .btn-signin:hover {
             background: #f40612;
-            transform: translateY(-1px);
         }
 
         .btn-signin:active {
             transform: translateY(1px);
         }
 
-        /* --- HELPERS (Remember me / Need help) --- */
+        .btn-signin:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- HELPERS --- */
         .form-help {
             display: flex;
             justify-content: space-between;
@@ -129,6 +148,7 @@
             width: auto;
             margin: 0;
             padding: 0;
+            background: transparent;
         }
 
         .form-help a {
@@ -146,6 +166,10 @@
             margin-bottom: 10px;
             display: none;
             font-weight: bold;
+            background: rgba(232, 124, 3, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
         }
 
         /* --- FOOTER LINK --- */
@@ -163,6 +187,24 @@
         .signup-now a:hover {
             text-decoration: underline;
         }
+
+        /* --- SPINNER --- */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+            display: none; /* Hidden by default */
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -178,11 +220,17 @@
             <div class="input-group">
                 <input type="email" id="email" placeholder="Email or phone number" required autocomplete="on">
             </div>
+            
+            <!-- Added relative wrapper for password input -->
             <div class="input-group">
                 <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
             </div>
 
-            <button type="submit" class="btn-signin">Sign In</button>
+            <button type="submit" class="btn-signin" id="submitBtn">
+                <span class="spinner" id="btnSpinner"></span>
+                <span id="btnText">Sign In</span>
+            </button>
 
             <div class="form-help">
                 <label>
@@ -192,52 +240,84 @@
             </div>
         </form>
 
-        <!-- Updated Text for StreamHub -->
         <div class="signup-now">
             New to StreamHub? <a href="signup.html">Sign up now</a>.
         </div>
     </div>
 
     <script>
-        // Database URL kept exactly the same as your original code
+        // 1. CONFIGURATION
         const databaseURL = 'https://69763f18c0c36a2a99509fa2.mockapi.io/users';
 
+        // 2. TOGGLE PASSWORD VISIBILITY
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Simple feedback: change opacity slightly when visible
+            const icon = document.querySelector('.toggle-password');
+            icon.style.opacity = type === 'text' ? '1' : '0.7';
+        }
+
+        // 3. LOGIN LOGIC
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorDisplay = document.getElementById('errorDisplay');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
 
-            // Hide previous errors
+            // UI: Set Loading State
             errorDisplay.style.display = 'none';
+            submitBtn.disabled = true;
+            btnText.textContent = "Signing In...";
+            btnSpinner.style.display = "inline-block";
+            submitBtn.style.background = "#555"; // Grey out button
 
             try {
-                // 1. ADMIN CHECK (Kept your original credentials exactly)
+                // --- ADMIN CHECK ---
+                // Hardcoded Admin Logic (Matches your admin_panel_mockapi access)
                 if (email === "adminUday@netflix.com" && password === "Siva@9948") {
                     window.location.href = 'admin_panel_mockapi.html';
                     return;
                 }
 
-                // 2. DATABASE CHECK (MockAPI)
+                // --- DATABASE CHECK (MockAPI) ---
                 const response = await fetch(databaseURL);
+                
+                if (!response.ok) throw new Error("Network response was not ok");
+                
                 const users = await response.json();
 
+                // Find user with matching email AND password
                 const validUser = users.find(u => u.email === email && u.password === password);
 
                 if (validUser) {
+                    // Success: Save to LocalStorage and redirect
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('currentUser', email);
-                    window.location.href = 'browse.html';
+                    // Ideally, check if 'browse.html' exists, otherwise alert success
+                    window.location.href = 'browse.html'; 
                 } else {
-                    // Show error message in the UI instead of native alert
-                    errorDisplay.style.display = 'block';
-                    errorDisplay.textContent = "Invalid email or password.";
+                    // Failure: Invalid Credentials
+                    throw new Error("Invalid email or password.");
                 }
+
             } catch (err) {
+                // Error Handling UI
                 errorDisplay.style.display = 'block';
-                errorDisplay.textContent = "Connection error. Please try again.";
-                console.error("Error:", err);
+                errorDisplay.textContent = err.message || "Connection error. Please try again.";
+                console.error("Login Error:", err);
+
+                // Reset Button State
+                submitBtn.disabled = false;
+                btnText.textContent = "Sign In";
+                btnSpinner.style.display = "none";
+                submitBtn.style.background = "#e50914";
             }
         });
     </script>
