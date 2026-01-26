@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>StreamHub Boss Panel</title>
+
+    <link rel="icon"
+        href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xNi4wNTEgMTIuNjE2YTEgMSAwIDAgMSAxLjkwOS4wMjRsLjczNyAxLjQ1MmExIDEgMCAwIDAgLjczNy41MzVsMS42MzQuMjU2YTEgMSAwIDAgMSAuNTg4IDEuODA2bC0xLjE3MiAxLjE2OGExIDEgMCAwIDAtLjI4Mi44NjZsLjI1OSAxLjYxM2ExIDEgMCAwIDEtMS41NDEgMS4xMzRsLTEuNDY1LS43NWExIDEgMCAwIDAtLjkxMiAwbC0xLjQ2NS43NWExIDEgMCAwIDEtMS41MzktMS4xMzNsLjI1OC0xLjYxM2ExIDEgMCAwIDAtLjI4Mi0uODY2bC0xLjE1Ni0xLjE1M2ExIDEgMCAwIDEgLjU3Mi0xLjgyMmwxLjYzMy0uMjU2YTEgMSAwIDAgMCAuNzM3LS41MzV6Ii8+PC9zdmc+">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-red: #ff003c;
+            --neon-red-glow: rgba(255, 0, 60, 0.6);
+            --gold-accent: #ffd700;
+            --bg-dark: #050505;
+            --panel-bg: #0a0a0a;
+            --border-color: #222;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* ================= HEADER ================= */
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            border-bottom: 2px solid var(--neon-red);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px var(--neon-red-glow);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Lion Icon Style */
+        .lion-icon {
+            width: 50px;
+            height: 50px;
+            fill: var(--neon-red);
+            filter: drop-shadow(0 0 5px var(--neon-red));
+            animation: pulseIcon 2s infinite;
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            font-weight: 900;
+        }
+
+        .brand span {
+            color: var(--neon-red);
+            text-shadow: 0 0 15px var(--neon-red);
+        }
+
+        .logout-btn {
+            border: 1px solid var(--neon-red);
+            background: transparent;
+            color: var(--neon-red);
+            padding: 10px 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-red-glow);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .logout-btn:hover {
+            background: var(--neon-red);
+            color: white;
+            box-shadow: 0 0 30px var(--neon-red);
+        }
+
+        /* ================= WELCOME BANNER ================= */
+        .welcome-banner {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .welcome-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        .welcome-text::before {
+            content: 'ACCESS GRANTED: ';
+            display: block;
+            font-size: 1rem;
+            color: var(--neon-red);
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--neon-red);
+        }
+
+        .welcome-text span {
+            color: var(--neon-red);
+            text-shadow: 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
+        }
+
+        /* ================= LAYOUT ================= */
+        .container {
+            padding: 20px 40px 60px;
+            max-width: 1300px;
+            margin: auto;
+        }
+
+        /* ================= CARDS ================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border-left: 5px solid var(--neon-red);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+            transition: 0.4s;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 0, 60, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+            opacity: 0;
+        }
+
+        .card:hover::after {
+            opacity: 1;
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.4);
+        }
+
+        .card h3 {
+            color: #888;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* ================= TABLE ================= */
+        .table-container {
+            background: var(--panel-bg);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 50px rgba(255, 0, 60, 0.1);
+        }
+
+        .table-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--neon-red);
+            box-shadow: 0 0 15px var(--neon-red);
+        }
+
+        .table-header {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            background: rgba(255, 0, 60, 0.05);
+        }
+
+        .table-header h2 {
+            color: var(--neon-red);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 20px;
+            background: #0f0f0f;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-align: left;
+            border-bottom: 2px solid #222;
+        }
+
+        td {
+            padding: 18px 20px;
+            color: #ccc;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Inter', sans-serif;
+        }
+
+        tr:hover td {
+            background: rgba(255, 0, 60, 0.05);
+            color: white;
+            text-shadow: 0 0 2px white;
+        }
+
+        .status-badge {
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .loading {
+            padding: 80px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            color: #666;
+            font-size: 1.2rem;
+            animation: blink 1s infinite;
+        }
+
+        /* ================= ANIMATIONS ================= */
+        @keyframes pulseIcon {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--neon-red)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 15px var(--neon-red)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--neon-red)); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-text { font-size: 1.8rem; }
+            .header { padding: 15px 20px; flex-direction: column; gap: 15px; }
+            .brand { font-size: 1.4rem; }
+            .container { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="brand-container">
+            <!-- Lion Icon SVG -->
+            <svg class="lion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+                <!-- Stylized mane for lion effect -->
+                <path d="M12 2L2 12h3l7-7 7 7h3L12 2zm0 2l5 5H7l5-5z" opacity="0.5" />
+            </svg>
+            <div class="brand">STREAMHUB <span>// BOSS</span></div>
+        </div>
+        <a href="signin.html" class="logout-btn">Logout Boss</a>
+    </div>
+
+    <!-- Boss Welcome Section -->
+    <div class="welcome-banner">
+        <h1 class="welcome-text">Hello <span>BOSS</span></h1>
+    </div>
+
+    <div class="container">
+
+        <div class="stats-grid">
+            <div class="card">
+                <h3>Total Subjects</h3>
+                <div class="number" id="totalUsers">0</div>
+            </div>
+            <div class="card">
+                <h3>System Status</h3>
+                <div class="number" style="font-size:1.8rem; color:#00ff66;">UNSTOPPABLE</div>
+            </div>
+            <div class="card">
+                <h3>Clearance</h3>
+                <div class="number" style="font-size:1.8rem; color:var(--neon-red);">LEVEL 1</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h2>Database Records</h2>
+                <span class="status-badge">Live Connection</span>
+            </div>
+
+            <div id="loading" class="loading">INITIALIZING BOSS PROTOCOLS...</div>
+
+            <table id="userTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject Email</th>
+                        <th>Access Key</th>
+                        <th>Reg. Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        const databaseURL = 'https://69763f18c0c36a2a99509fa2.mockapi.io/users';
+
+        async function initDashboard() {
+            try {
+                const res = await fetch(databaseURL);
+                const users = await res.json();
+
+                // Hype loading effect
+                await new Promise(r => setTimeout(r, 800)); 
+
+                loading.style.display = "none";
+                userTable.style.display = "table";
+                
+                // Animate number counting up
+                const targetNumber = users.length;
+                let current = 0;
+                const counterElement = document.getElementById('totalUsers');
+                
+                const interval = setInterval(() => {
+                    current++;
+                    counterElement.textContent = current;
+                    if (current >= targetNumber) clearInterval(interval);
+                }, 50);
+
+                users.forEach((user, i) => {
+                    userTableBody.innerHTML += `
+                        <tr>
+                            <td style="color:var(--neon-red); font-family:'Orbitron'">#${user.id || i + 1}</td>
+                            <td style="color:white; font-weight:600;">${user.email}</td>
+                            <td style="color:#666;font-family:monospace;">${user.password}</td>
+                            <td style="color:#888">Just Now</td>
+                            <td><span class="status-badge">Active</span></td>
+                        </tr>
+                    `;
+                });
+            } catch {
+                loading.textContent = "SYSTEM FAILURE: CONNECTION LOST";
+                loading.style.color = "red";
+            }
+        }
+
+        initDashboard();
+    </script>
+
+</body>
+
+</html>
