@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Removed Netflix favicon to stop 'Dangerous Site' warning -->
+    
+    <title>StreamHub Sign Up</title>
+
+    <style>
+        /* --- GLOBAL STYLES (Matching Sign In) --- */
+        body {
+            background-image: url('https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bcae-07a3f8dc141a/f6d7434e-d6de-4185-a6d4-c77a2d08737b/US-en-20220502-popsignuptwoweeks-perspective_alpha_website_large.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Dark Overlay */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        /* --- AUTH BOX DESIGN --- */
+        .auth-box {
+            position: relative;
+            background: rgba(22, 22, 22, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+
+            padding: 60px 68px 40px;
+            border-radius: 4px;
+            width: 450px;
+            z-index: 2;
+            color: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-box h1 {
+            font-size: 2rem;
+            margin-bottom: 28px;
+            font-weight: 700;
+        }
+
+        /* --- INPUTS --- */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 16px 20px;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            transition: background 0.2s;
+            box-sizing: border-box;
+        }
+
+        .auth-box input:focus {
+            outline: 2px solid #e50914;
+            background: #454545;
+        }
+
+        /* --- BUTTON --- */
+        .btn-signup {
+            width: 100%;
+            padding: 16px;
+            background: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(229, 9, 20, 0.3);
+        }
+
+        .btn-signup:hover {
+            background: #f40612;
+            transform: translateY(-1px);
+        }
+
+        .btn-signup:active {
+            transform: translateY(1px);
+        }
+
+        /* --- ERROR MESSAGE --- */
+        .error-msg {
+            color: #e87c03;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            display: none;
+            font-weight: bold;
+        }
+
+        /* --- FOOTER LINK --- */
+        .signin-now {
+            margin-top: 40px;
+            color: #737373;
+            font-size: 1rem;
+        }
+
+        .signin-now a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .signin-now a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-box">
+        <h1>Sign Up</h1>
+
+        <div id="errorDisplay" class="error-msg"></div>
+
+        <form id="signupForm">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email or phone number" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Add a password" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-signup">Create Account</button>
+        </form>
+
+        <div class="signin-now">
+            Already have an account? <a href="signin.html">Sign in now</a>.
+        </div>
+    </div>
+
+    <script>
+        // Database URL kept exactly the same
+        const databaseURL = 'https://69763f18c0c36a2a99509fa2.mockapi.io/users';
+
+        document.getElementById('signupForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDisplay = document.getElementById('errorDisplay');
+
+            // Hide previous errors
+            errorDisplay.style.display = 'none';
+
+            // --- ADMIN BLOCK CHECK (Kept your original logic) ---
+            if (email === "admin@netflix.com") {
+                errorDisplay.style.display = 'block';
+                errorDisplay.textContent = "Admin account is restricted.";
+                return;
+            }
+
+            try {
+                // 1. Check if email exists (Fetch)
+                const checkResponse = await fetch(databaseURL);
+                const existingUsers = await checkResponse.json();
+                const userExists = existingUsers.find(u => u.email === email);
+
+                if (userExists) {
+                    errorDisplay.style.display = 'block';
+                    errorDisplay.textContent = "This email is already registered.";
+                    return;
+                }
+
+                // 2. Create User (POST)
+                const response = await fetch(databaseURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                if (response.ok) {
+                    // Redirect to Sign In page on success
+                    window.location.href = 'signin.html';
+                } else {
+                    throw new Error("Failed to create account");
+                }
+            } catch (err) {
+                errorDisplay.style.display = 'block';
+                errorDisplay.textContent = "Connection error. Please try again.";
+                console.error("Error:", err);
+            }
+        });
+    </script>
+</body>
+
+</html>
