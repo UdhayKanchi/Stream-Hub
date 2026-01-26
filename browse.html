@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub - Watch Movies & TV Shows</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Helvetica+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary-red: #e50914;
+            --bg-black: #141414;
+            --bg-dark-gray: #181818;
+            --text-white: #ffffff;
+            --text-gray: #b3b3b3;
+            --header-height: 68px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-black);
+            color: var(--text-white);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- UTILITIES --- */
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition-speed);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        /* --- STREAMHUB LOGO STYLES --- */
+        .streamhub-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem; /* Fits 68px header */
+            color: #E50914;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .streamhub-logo span {
+            color: white;
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: var(--header-height);
+            padding: 0 4%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 10%, transparent);
+            transition: background-color 0.4s ease;
+        }
+
+        header.scrolled {
+            background-color: rgb(20, 20, 20);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Removed .netflix-icon class as we are using text logo */
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .nav-links li a {
+            color: #e5e5e5;
+            transition: color 0.3s;
+        }
+
+        .nav-links li a:hover,
+        .nav-links li a.active {
+            color: var(--text-white);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+        }
+
+        .icon-btn {
+            background: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.0s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Profile Dropdown */
+        .profile-container {
+            position: relative;
+        }
+
+        .profile-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            object-fit: cover;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 45px;
+            right: -10px;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px 0;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            font-size: 13px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-item:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #333;
+            margin: 5px 0;
+        }
+
+        .signout-btn {
+            color: #fff;
+            width: 100%;
+            text-align: left;
+            background: none;
+        }
+
+        .signout-btn:hover {
+            background: none;
+            text-decoration: underline;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            position: relative;
+            height: 90vh;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            scroll-margin-top: var(--header-height);
+        }
+
+        .hero-video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-video-bg iframe {
+            width: 100vw;
+            height: 56.25vw;
+            min-height: 100vh;
+            min-width: 177.77vh;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.6;
+            filter: brightness(0.5) contrast(1.1);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.6) 40%, rgba(20, 20, 20, 0) 100%),
+                linear-gradient(to top, var(--bg-black) 0%, transparent 20%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            padding-left: 4%;
+            width: 100%;
+            max-width: 650px;
+            padding-top: 100px;
+        }
+
+        .hero-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5rem;
+            line-height: 0.9;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            background: -webkit-linear-gradient(#fff, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #46d369;
+            font-size: 1.1rem;
+        }
+
+        .hero-desc {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            color: #fff;
+            max-width: 500px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 0.8rem 2.2rem;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-play {
+            background-color: white;
+            color: black;
+        }
+
+        .btn-play:hover {
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+
+        .btn-more {
+            background-color: rgba(109, 109, 110, 0.7);
+            color: white;
+        }
+
+        .btn-more:hover {
+            background-color: rgba(109, 109, 110, 0.4);
+        }
+
+        /* --- VIDEO ROWS --- */
+        main {
+            position: relative;
+            z-index: 20;
+            margin-top: -150px;
+            padding-bottom: 50px;
+        }
+
+        .row {
+            margin-bottom: 20px;
+            padding: 30px 0 20px 4%;
+            position: relative;
+            scroll-margin-top: 100px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .row:nth-child(1) {
+            z-index: 20;
+        }
+
+        .row:nth-child(2) {
+            z-index: 30;
+        }
+
+        .row:nth-child(3) {
+            z-index: 40;
+        }
+
+        .row:nth-child(4) {
+            z-index: 50;
+        }
+
+        .row:nth-child(5) {
+            z-index: 60;
+        }
+
+        .row-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #e5e5e5;
+            transition: 0.3s;
+            opacity: 1;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+        }
+
+        .row-title:hover {
+            opacity: 1;
+            color: white;
+        }
+
+        .row-wrapper {
+            position: relative;
+        }
+
+        .row-container {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: visible;
+            gap: 10px;
+            padding-right: 4%;
+            padding-bottom: 40px;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .row-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- NAVIGATION ARROWS --- */
+        .slider-arrow {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4%;
+            background-color: rgba(20, 20, 20, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            z-index: 100;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s, background-color 0.3s;
+            border: none;
+            height: 100%;
+        }
+
+        .row-wrapper:hover .slider-arrow {
+            opacity: 1;
+        }
+
+        .slider-arrow:hover {
+            background-color: rgba(20, 20, 20, 0.8);
+            transform: scale(1.1);
+        }
+
+        .slider-arrow.left {
+            left: 0;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .slider-arrow.right {
+            right: 0;
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+
+        /* --- CARDS --- */
+        .card {
+            flex: 0 0 auto;
+            width: 250px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.17, 0.84, 0.44, 1), z-index 0s 0.3s;
+            border-radius: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-img-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #181818;
+            padding: 15px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s 0.1s, transform 0.2s 0.1s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            font-size: 13px;
+        }
+
+        .card:hover {
+            transform: scale(1.4);
+            z-index: 999;
+            transition: transform 0.4s cubic-bezier(0.17, 0.84, 0.44, 1), z-index 0s;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .card:hover .card-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: transparent;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .action-btn.play-mini {
+            background: white;
+            color: black;
+            border: none;
+        }
+
+        .action-btn:hover {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .card-meta {
+            color: #46d369;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .card-tags {
+            color: #fff;
+            margin-top: 5px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+            padding-top: 50px;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--bg-dark-gray);
+            width: 90%;
+            max-width: 900px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+            position: relative;
+            transform: scale(0.9);
+            transition: 0.4s cubic-bezier(0.17, 0.84, 0.44, 1);
+            margin-bottom: 50px;
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #181818;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-close-btn:hover {
+            background: white;
+            color: black;
+            border-color: white;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: black;
+        }
+
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .modal-details {
+            padding: 40px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .modal-left {
+            flex: 3;
+        }
+
+        .modal-right {
+            flex: 1;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .modal-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .match-score {
+            color: #46d369;
+            font-weight: bold;
+        }
+
+        .modal-desc {
+            line-height: 1.7;
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .modal-label {
+            color: #777;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal-value {
+            color: #ddd;
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast {
+            position: fixed;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #141414;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 5000;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(20px);
+        }
+
+        /* Footer */
+        footer {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            color: #757575;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-logo-text {
+                font-size: 3rem;
+            }
+            
+            .streamhub-logo {
+                font-size: 1.8rem;
+            }
+
+            .card:hover {
+                transform: scale(1.1);
+            }
+
+            .slider-arrow {
+                display: none;
+            }
+
+            .modal-details {
+                flex-direction: column;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header id="navbar">
+        <div class="nav-left">
+            <a href="#home" class="logo-container">
+                <!-- StreamHub Text Logo (Replacing Netflix Image) -->
+                <span class="streamhub-logo">Stream<span>Hub</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#tv-shows" class="nav-link">TV Shows</a></li>
+                <li><a href="#movies" class="nav-link">Movies</a></li>
+                <li><a href="#kids" class="nav-link">Kids</a></li>
+                <li><a href="#new-popular" class="nav-link">New & Popular</a></li>
+                <li><a href="#my-list" class="nav-link">My List</a></li>
+
+            </ul>
+        </div>
+
+        <div class="nav-right">
+            <button class="icon-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+
+            <button class="icon-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </button>
+
+            <div class="profile-container">
+                <img src="https://picsum.photos/seed/user/200/200" alt="Profile" class="profile-icon"
+                    onclick="toggleDropdown()">
+
+                <div class="dropdown-menu" id="profileDropdown">
+                    <div class="dropdown-item">
+                        <img src="https://picsum.photos/seed/user/200/200"
+                            style="width:30px; height:30px; border-radius:4px;">
+                        <span>User</span>
+                    </div>
+                    <div class="divider"></div>
+                    <a href="#" class="dropdown-item">Manage Profiles</a>
+                    <a href="#" class="dropdown-item">Account</a>
+                    <a href="#" class="dropdown-item">Help Center</a>
+                    <div class="divider"></div>
+                    <!-- Updated Text -->
+                    <button class="dropdown-item signout-btn" onclick="signOut()">Sign out of StreamHub</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-video-bg" id="hero-video-container">
+                <!-- Dummy Video: Abstract Sci-Fi Background -->
+            </div>
+
+            <div class="hero-content">
+                <div class="hero-logo-text" id="h-title">STRANGER<br>THINGS 5</div>
+                <div class="hero-meta">
+                    <span class="match-score">98% Match</span>
+                    <span style="color:white">2025</span>
+                    <span
+                        style="border:1px solid rgba(255,255,255,0.4); padding:0 4px; font-size:0.8em; color:#ddd">TV-MA</span>
+                    <span style="color:white">1 Season</span>
+                </div>
+                <div class="hero-desc" id="h-desc">
+                    The final chapter begins. The fate of Hawkins hangs in the balance as the heroes face their ultimate
+                    battle against the Upside Down.
+                </div>
+                <div class="hero-buttons">
+                    <button class="btn btn-play" onclick="playHero()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="black">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Play
+                    </button>
+                    <button class="btn btn-more" onclick="playHero()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        More Info
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rows Container -->
+        <div id="content-rows"></div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="videoModal">
+        <div class="modal-content">
+            <div class="modal-close-btn" onclick="closeModal()">&#10005;</div>
+            <div class="video-wrapper">
+                <iframe id="youtube-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="modal-details">
+                <div class="modal-left">
+                    <div class="modal-title" id="m-title">Title</div>
+                    <div class="modal-meta">
+                        <span class="match-score" id="m-match">98% Match</span>
+                        <span style="color:#ddd" id="m-year">2025</span>
+                        <span style="border:1px solid #777; padding:0 5px; font-size:12px">HD</span>
+                    </div>
+                    <div class="modal-desc" id="m-desc">Description...</div>
+                </div>
+                <div class="modal-right">
+                    <span class="modal-label">Cast:</span>
+                    <div class="modal-value" id="m-cast">Actor, Actor</div>
+                    <br>
+                    <span class="modal-label">Genres:</span>
+                    <div class="modal-value" id="m-genre">Action, Sci-Fi</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast">Signed Out Successfully</div>
+
+    <footer>
+        <!-- Updated Footer Text -->
+        <p>StreamHub India - User Experience Demo</p>
+        <p style="margin-top:10px; font-size:11px; color:#555">This is a concept design. All videos are placeholders.
+        </p>
+    </footer>
+
+    <script>
+        // --- UTILS ---
+        function getYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // --- DUMMY DATA ---
+        const heroData = {
+            title: "Stranger Things 5",
+            desc: "The beginning of the end. The Upside Down is no longer contained. Hawkins faces extinction.",
+            year: "2025",
+            url: "https://youtu.be/Zv1HbJD5fw4?si=eQiTiuHW58KMIM2O",
+            cast: "Millie Bobby Brown, Finn Wolfhard",
+            genre: "Sci-Fi, Horror"
+        };
+
+        const moviesData = [
+            { title: "The Dark Knight Rises", desc: "Batman has to face the Bane, a ruthless terrorist leader.", year: "2012", url: "https://www.youtube.com/watch?v=8hP9D6kZseM", cast: "Christian Bale, Tom Hardy", genre: "Action, Drama" },
+            { title: "Inception", desc: "A thief who steals corporate secrets through dream-sharing technology.", year: "2010", url: "https://www.youtube.com/watch?v=8hP9D6kZseM", cast: "Leonardo DiCaprio, Joseph Gordon-Levitt", genre: "Sci-Fi, Thriller" },
+            { title: "RRR", desc: "A fearless revolutionary and an officer in the British force alongside their deep friendship.", year: "2022", url: "https://youtu.be/NgBoMJy386M?si=QKq-ZUAzlS7xjZu8", cast: "NTR, Ram Charan", genre: "Action, Drama" },
+            { title: "Baahubali: The Beginning", desc: "In the ancient Indian kingdom of Mahishmati, an intrepid young man falls in love.", year: "2015", url: "https://youtu.be/3NQRhE772b0?si=e3UJLM9IQvgJrcC1", cast: "Prabhas, Rana", genre: "Epic, Action" },
+            { title: "Interstellar", desc: "A team of explorers travel through a wormhole in space.", year: "2014", url: "https://www.youtube.com/watch?v=zSWdZVtXT7E", cast: "Matthew McConaughey", genre: "Adventure, Drama" },
+            { title: "Avengers: Endgame", desc: "The Avengers assemble once more to reverse Thanos's actions.", year: "2019", url: "https://www.youtube.com/watch?v=TcMBFSGVi1c", cast: "Robert Downey Jr., Chris Evans", genre: "Action, Sci-Fi" },
+            { title: "KGF: Chapter 2", desc: "The blood-soaked land of Kolar Gold Fields has a new overlord.", year: "2022", url: "https://youtu.be/bDTUFufX-1s?si=pPnb2f8VB1cEoR_x", cast: "Yash, Sanjay Dutt", genre: "Period, Action" },
+            { title: "Spider-Man: No Way Home", desc: "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help.", year: "2021", url: "https://www.youtube.com/watch?v=JfVOs4VSpmA", cast: "Tom Holland", genre: "Action, Adventure" },
+            { title: "Pushpa: The Rise", desc: "A coolie rises to become the king of red sandalwood smuggling.", year: "2021", url: "https://youtu.be/Q1NKMPhP8PY?si=VN6j9aII6pEucpI6", cast: "Allu Arjun", genre: "Action, Thriller" },
+            { title: "Big Buck Bunny", desc: "A large and lovable rabbit deals with three bullying rodents.", year: "2008", url: "https://www.youtube.com/watch?v=aqz-KE-bpKQ", cast: "Open Source Animation", genre: "Animation, Short" },
+            { title: "Sintel", desc: "A lonely young woman, Sintel, searches for a dragon she calls Scales.", year: "2010", url: "https://www.youtube.com/watch?v=eRsGyueVLvQ", cast: "Open Source Animation", genre: "Animation, Fantasy" },
+            { title: "Cyberpunk Edgerunners", desc: "A street kid tries to survive in a technology and body modification-obsessed city.", year: "2022", url: "https://youtu.be/KvMY1uzSC1E?si=cDOTp2Cb8kHSe4GI", cast: "Kenichiro Ohashi", genre: "Anime, Sci-Fi" },
+            { title: "Businessman", desc: "A Mafia Based crime story.", year: "2016", url: "https://youtu.be/1qJRNcouLOY?si=SqBD175OZ20ixH9j", cast: "Mahesh babu, Kajal Agarwal", genre: "Action, Drama, Crime" },
+            { title: "Murari", desc: "An Evergreen Family Story.", year: "2001", url: "https://youtu.be/_mPuQcQ7aGg?si=dz335Fu5Y0PVxvVO", cast: "Mahesh Babu, Sonali Bindre", genre: "Action, Drama" },
+            { title: "Akhanda 2: Thaandavam", desc: "Devotional Mass Action Sequel with Powerful Performance.", year: "2025", url: "https://youtu.be/2mt6f8rIEi4?si=w4YnBnZxSTZMtpLi", cast: "Nandamuri Balakrishna, Samyukta Menon", genre: "Action, Drama" },
+            { title: "Daaku Maharaaj", desc: "High-Octane Mass Action as the God of Masses.", year: "Upcoming", url: "https://www.youtube.com/watch?v=teN0JZ67KZU", cast: "Nandamuri Balakrishna", genre: "Action, Thriller" },
+            { title: "Akhanda", desc: "Explosive Devotional Mass Entertainer.", year: "2021", url: "https://youtu.be/Wx9qWSXeJzk?si=wUAwjGCs0ZrY6IFB", cast: "Nandamuri Balakrishna, Pragya Jaiswal", genre: "Action, Drama" },
+
+            // Added Jr. NTR films
+            { title: "Devara: Part 1", desc: "Epic Sea-Based Action with Mass Appeal.", year: "2024", url: "https://youtu.be/5cx7rvMvAWo?si=lZcfGz2mwFo2DkXC", cast: "Jr NTR, Saif Ali Khan, Janhvi Kapoor", genre: "Action, Drama" },
+            { title: "RRR", desc: "Revolutionary Friendship & Epic Action (already in list but NTR highlight).", year: "2022", url: "https://youtu.be/NgBoMJy386M?si=QKq-ZUAzlS7xjZu8", cast: "Jr NTR, Ram Charan", genre: "Action, Drama" },
+            { title: "Temper", desc: "Cop with Mass Attitude & Action.", year: "2015", url: "https://youtu.be/SQgRN5tu1f4?si=f1OkAm4SqwiuyaDF", cast: "Jr NTR, Kajal Aggarwal", genre: "Action, Drama" },
+
+            // Added Ravi Teja films
+            { title: "Mass Jathara", desc: "High-Energy Mass Entertainer with Fun & Action.", year: "Upcoming", url: "https://www.youtube.com/watch?v=Qm-wNxOcEL4", cast: "Ravi Teja, Sreeleela", genre: "Action, Comedy" },
+            { title: "Mr. Bachchan", desc: "Mass Maharaja in Explosive Action Mode.", year: "2024", url: "https://www.youtube.com/watch?v=BZefBM0Bwdc", cast: "Ravi Teja, Bhagyashri", genre: "Action, Drama" },
+            { title: "Eagle", desc: "Stylish Action Thriller with Mass Elements.", year: "2024", url: "https://www.youtube.com/watch?v=2sX0lElZKQE", cast: "Ravi Teja, Anupama Parameswaran", genre: "Action, Thriller" },
+            {
+                title: "Pokiri",
+                desc: "The Ultimate Mass Action Entertainer.",
+                year: "2006",
+                url: "https://www.youtube.com/watch?v=Eizdl6D0O9M",
+                cast: "Mahesh Babu, Ileana D'Cruz",
+                genre: "Action, Thriller"
+            },
+            {
+                title: "Athadu",
+                desc: "Style + Action + Emotion = Classic.",
+                year: "2005",
+                url: "https://www.youtube.com/watch?v=KWt9dzrc1Go",
+                cast: "Mahesh Babu, Trisha",
+                genre: "Action, Drama"
+            },
+            {
+                title: "Okkadu",
+                desc: "Youthful Action-Romance Blockbuster.",
+                year: "2003",
+                url: "https://www.youtube.com/watch?v=OlKmTiZ1Nmc",
+                cast: "Mahesh Babu, Bhumika Chawla",
+                genre: "Action, Romance"
+            },
+            {
+                title: "Race Gurram",
+                desc: "Fun-Filled Action Comedy with Family Vibes.",
+                year: "2014",
+                url: "https://www.youtube.com/watch?v=yCt-YUbs7H4",
+                cast: "Allu Arjun, Shruti Haasan",
+                genre: "Action, Comedy"
+            },
+            {
+                title: "Mirchi",
+                desc: "Powerful Love + Action + Family Drama.",
+                year: "2013",
+                url: "https://www.youtube.com/watch?v=UONFLKhg5AE",
+                cast: "Prabhas, Anushka Shetty, Richa Gangopadhyay",
+                genre: "Action, Romance, Drama"
+            },
+            {
+                title: "Businessman",
+                desc: "Style + Swag + Mass Action.",
+                year: "2012",
+                url: "https://www.youtube.com/watch?v=WX5NCPAuPco",
+                cast: "Mahesh Babu, Kajal Aggarwal",
+                genre: "Action, Drama"
+            },
+            {
+                title: "Dookudu",
+                desc: "Ultimate Action-Comedy Family Hit.",
+                year: "2011",
+                url: "https://www.youtube.com/watch?v=jHgcCY7htJE",
+                cast: "Mahesh Babu, Samantha",
+                genre: "Action, Comedy"
+            }
+        ];
+
+
+        // --- CATEGORIES MATCHING NAV ---
+        const categories = [
+            { id: "new-popular", title: "New & Popular" },
+            { id: "tv-shows", title: "TV Shows" },
+            { id: "movies", title: "Movies" },
+            { id: "kids", title: "Kids" },
+            { id: "my-list", title: "My List" }
+
+        ];
+
+        // --- INIT ---
+        const contentRows = document.getElementById('content-rows');
+        const modal = document.getElementById('videoModal');
+        const iframe = document.getElementById('youtube-player');
+        const navbar = document.getElementById('navbar');
+        const heroVideoContainer = document.getElementById('hero-video-container');
+        const dropdown = document.getElementById('profileDropdown');
+
+        function init() {
+            setupHero();
+            renderRows();
+            setupScrollEffect();
+            setupIntersectionObserver();
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.profile-container')) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        }
+
+        function setupHero() {
+            const heroId = getYouTubeId(heroData.url);
+            if (heroId) {
+                heroVideoContainer.innerHTML = `
+                    <iframe 
+                        src="https://www.youtube.com/embed/${heroId}?autoplay=1&mute=1&loop=1&playlist=${heroId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&disablekb=1" 
+                        allow="autoplay; encrypted-media" 
+                        allowfullscreen>
+                    </iframe>
+                `;
+            }
+        }
+
+        function renderRows() {
+            let html = '';
+            categories.forEach((cat) => {
+                const shuffled = [...moviesData].sort(() => 0.5 - Math.random());
+
+                let cardsHtml = '';
+                shuffled.forEach(movie => {
+                    const videoId = getYouTubeId(movie.url);
+                    const thumbUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+                    const dataStr = encodeURIComponent(JSON.stringify(movie));
+
+                    cardsHtml += `
+                        <div class="card" onclick="openModal('${dataStr}')">
+                            <div class="card-img-wrapper">
+                                <img src="${thumbUrl}" loading="lazy" alt="${movie.title}">
+                                <div class="card-info">
+                                    <div class="card-actions">
+                                        <button class="action-btn play-mini">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="black"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                        </button>
+                                        <button class="action-btn">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                        <button class="action-btn">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="card-title">${movie.title}</div>
+                                    <div class="card-meta">98% Match</div>
+                                    <div class="card-tags">${movie.genre} • ${movie.year}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <section class="row" id="${cat.id}">
+                        <h3 class="redirectLink" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #e5e5e5; cursor: pointer; letter-spacing: 0.5px;">${cat.title}</h3>
+                        <div class="row-wrapper">
+                            <button class="slider-arrow left" onclick="slideRow(this, -1)">‹</button>
+                            <div class="row-container">
+                                ${cardsHtml}
+                            </div>
+                            <button class="slider-arrow right" onclick="slideRow(this, 1)">›</button>
+                        </div>
+                    </section>
+                `;
+            });
+            contentRows.innerHTML = html;
+        }
+
+        function toggleDropdown() {
+            dropdown.classList.toggle('active');
+        }
+
+        function signOut() {
+            showToast("Signed Out Successfully");
+            dropdown.classList.remove('active');
+            windows.location.href('index.html');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function slideRow(btn, direction) {
+            const container = btn.parentElement.querySelector('.row-container');
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+
+        function setupScrollEffect() {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape") closeModal();
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        }
+
+        function setupIntersectionObserver() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-50% 0px -50% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => link.classList.remove('active'));
+
+                        const id = entry.target.getAttribute('id');
+                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        }
+
+        function playHero() {
+            loadModalContent(heroData);
+        }
+
+        function openModal(dataStr) {
+            const movie = JSON.parse(decodeURIComponent(dataStr));
+            loadModalContent(movie);
+        }
+
+        function loadModalContent(data) {
+            document.getElementById('m-title').innerText = data.title;
+            document.getElementById('m-desc').innerText = data.desc;
+            document.getElementById('m-year').innerText = data.year;
+            document.getElementById('m-cast').innerText = data.cast;
+            document.getElementById('m-genre').innerText = data.genre;
+
+            const videoId = getYouTubeId(data.url);
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+            setTimeout(() => { iframe.src = ""; }, 300);
+        }
+
+        init();
+
+    </script>
+</body>
+
+</html>
