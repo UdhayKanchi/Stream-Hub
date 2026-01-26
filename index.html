@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamHub - Watch TV Shows Online, Watch Movies Online</title>
+
+  <!-- 
+    NOTE: Favicon removed to stop "Dangerous Site" warnings. 
+    You can add your own favicon later: <link rel="icon" href="your-logo.png">
+  -->
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- RESET & GLOBAL STYLES --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      color: #fff;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* --- UTILITIES --- */
+    .btn {
+      display: inline-block;
+      background-color: #e50914; /* Netflix Red / StreamHub Red */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #c11119;
+    }
+
+    .divider {
+      height: 8px;
+      background-color: #232323;
+      border: none;
+    }
+
+    /* --- STREAMHUB LOGO STYLES (TEMPORARY) --- */
+    /* This creates a text logo until you attach your image */
+    .logo-text {
+      font-family: 'Inter', sans-serif; /* Or 'Anton' for movie look */
+      font-size: 28px;
+      font-weight: 900;
+      color: #E50914;
+      text-decoration: none;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+    }
+    
+    .logo-text span {
+      color: #ffffff; /* The "Hub" part is white */
+    }
+
+    /* --- HEADER / NAVBAR --- */
+    .header {
+      position: relative;
+      height: 100vh;
+      min-height: 600px;
+      max-height: 800px; /* Don't make it too huge on big screens */
+      /* Kept the same background image for the visual effect */
+      background: url('https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bcae-07a3f8dc141a/f6d7434e-d6de-4185-a6d4-c77a2d08737b/US-en-20220502-popsignuptwoweeks-perspective_alpha_website_large.jpg') center center/cover no-repeat;
+      border-bottom: 8px solid #232323;
+    }
+
+    /* Dark overlay for hero */
+    .header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      background-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.8) 100%);
+      z-index: 1;
+    }
+
+    .navbar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4%;
+      max-width: 1920px;
+      margin: 0 auto;
+    }
+
+    /* Placeholder for when you add your image logo later */
+    .logo img {
+      width: 150px;
+      max-width: 148px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-select {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid #aaa;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .lang-select option {
+      background: #000;
+      color: white;
+    }
+
+    .btn-red {
+      background-color: #e50914;
+      color: white;
+      padding: 7px 17px;
+      font-size: 0.9rem;
+    }
+
+    /* --- HERO CONTENT --- */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      height: calc(100% - 68px); /* Subtract navbar height approx */
+      padding: 0 20px;
+    }
+
+    .hero-content h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      max-width: 800px;
+      margin-bottom: 1rem;
+    }
+
+    .hero-content h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-content p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* --- EMAIL FORM --- */
+    .email-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .email-form input {
+      width: 100%;
+      padding: 1.2rem;
+      border-radius: 4px;
+      border: none;
+      background: rgba(22, 22, 22, 0.7);
+      backdrop-filter: blur(2px);
+      color: white;
+      font-size: 1rem;
+      border: 1px solid #5c5c5c;
+    }
+
+    .email-form input:focus {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+
+    .btn-large {
+      font-size: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 150px;
+      min-height: 56px;
+      white-space: nowrap;
+    }
+
+    /* --- FEATURE SECTIONS --- */
+    .feature {
+      padding: 4.5rem 4%;
+      background: black;
+    }
+
+    .feature-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      gap: 20px;
+    }
+
+    .feature.reverse {
+      flex-direction: row-reverse;
+    }
+
+    .feature-text {
+      flex: 1;
+      padding-right: 20px;
+    }
+
+    .feature.reverse .feature-text {
+      padding-right: 0;
+      padding-left: 20px;
+    }
+
+    .feature-text h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    .feature-text p {
+      font-size: 1.5rem;
+      font-weight: 400;
+    }
+
+    .feature-visual {
+      flex: 1;
+      position: relative;
+    }
+
+    .feature-visual img {
+      width: 100%;
+      height: auto;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* --- FAQ SECTION --- */
+    .faq {
+      padding: 4.5rem 0;
+      text-align: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .faq h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 2rem;
+    }
+
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 3rem;
+      text-align: left;
+      max-width: 815px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .accordion-item {
+      background-color: #2d2d2d;
+      overflow: hidden;
+      transition: background-color 0.2s;
+    }
+
+    .accordion-item:hover {
+      background-color: #414141;
+    }
+
+    .accordion-btn {
+      width: 100%;
+      padding: 1.5rem;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .accordion-btn span {
+      font-size: 2.5rem;
+      font-weight: 300;
+      line-height: 0.5;
+      transform: rotate(0deg);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    /* Rotate span when active */
+    .accordion-item.active .accordion-btn span {
+      transform: rotate(45deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s cubic-bezier(0.5, 0, 0.1, 1);
+      background-color: #2d2d2d;
+      padding: 0 1.5rem;
+      border-top: 1px solid black;
+    }
+
+    .accordion-content p {
+      font-size: 1.5rem;
+      padding: 1.5rem 0;
+      line-height: 1.4;
+    }
+
+    .faq-cta {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .bottom-form {
+      margin-top: 2rem;
+    }
+
+    /* --- FOOTER --- */
+    .footer {
+      padding: 4.5rem 4%;
+      color: #737373;
+      font-size: 0.9rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .footer p {
+      margin-bottom: 2rem;
+    }
+
+    .footer-links {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 2rem;
+    }
+
+    .footer-links a {
+      color: #737373;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    .footer .lang-select {
+      background: black;
+      border-color: #737373;
+      color: #999;
+      padding: 0.5rem 2rem 0.5rem 1rem; /* extra padding for arrow */
+      margin-bottom: 1.5rem;
+    }
+    
+    .legal-text {
+        font-size: 0.75rem;
+        margin-top: 20px;
+        color: #555;
+    }
+
+    /* --- RESPONSIVE DESIGN --- */
+    @media (min-width: 960px) {
+      .email-form {
+        flex-direction: row;
+        align-items: stretch;
+        height: 56px;
+      }
+      .email-form input {
+        height: 100%;
+        flex: 1; /* Input takes all space */
+      }
+      .email-form button {
+        height: 100%;
+        width: auto; /* Button fits text */
+        flex-shrink: 0;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .hero-content h1 { font-size: 2rem; }
+      .hero-content h2 { font-size: 1.125rem; }
+      .feature-content { flex-direction: column; text-align: center; }
+      .feature.reverse { flex-direction: column; }
+      .feature-text { padding: 0 !important; margin-bottom: 1rem; }
+      .feature-text h2 { font-size: 2rem; }
+      .feature-text p { font-size: 1.125rem; }
+      .footer-links { grid-template-columns: repeat(2, 1fr); }
+      .accordion-btn { font-size: 1.125rem; padding: 1rem; }
+      .accordion-content p { font-size: 1.125rem; }
+    }
+
+    @media (max-width: 600px) {
+      .navbar { padding: 1.5rem 5%; }
+      .footer-links { grid-template-columns: 1fr; }
+      /* On mobile, make logo slightly smaller */
+      .logo-text { font-size: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header / Hero Section -->
+  <header class="header">
+    <nav class="navbar">
+      <!-- 
+         === LOGO UPDATE AREA === 
+         I have put a text logo here for now. 
+         WHEN YOU HAVE YOUR IMAGE, REPLACE THE <a> TAG BELOW WITH:
+         <a href="#" class="logo">
+            <img src="YOUR_LOGO_LINK_HERE.png" alt="StreamHub">
+         </a>
+      -->
+      <a href="#" class="logo-text">
+        Stream<span>Hub</span>
+      </a>
+
+      <div class="nav-right">
+        <select class="lang-select">
+          <option>English</option>
+          <option>हिन्दी</option>
+        </select>
+        <button class="btn btn-red" onclick="window.location.href='signup.html'">Sign In</button>
+      </div>
+    </nav>
+
+    <div class="hero-content">
+      <h1>Unlimited movies, TV shows and more</h1>
+      <h2>Watch anywhere. Cancel anytime.</h2>
+      <p>Ready to watch? Enter your email to create or restart your membership.</p>
+
+      <form class="email-form top-form" id="landingForm">
+        <input type="email" id="emailInput" placeholder="Email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-red btn-large">Get Started &gt;</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- Grey Divider -->
+  <div class="divider"></div>
+
+  <main>
+    <!-- Feature 1 -->
+    <section class="feature">
+      <div class="feature-content">
+        <div class="feature-text">
+          <h2>Enjoy on your TV</h2>
+          <p>Watch on smart TVs, PlayStation, Xbox, Chromecast, Apple TV, Blu-ray players and more.</p>
+        </div>
+        <div class="feature-visual">
+          <img src="https://assets.nflxext.com/ffe/siteui/acquisition/ourStory/fuji/desktop/tv.png" alt="TV">
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Feature 2 -->
+    <section class="feature">
+      <div class="feature-content reverse">
+        <div class="feature-text">
+          <h2>Download your shows to watch offline</h2>
+          <p>Save your favourites easily and always have something to watch.</p>
+        </div>
+        <div class="feature-visual">
+          <img src="https://assets.nflxext.com/ffe/siteui/acquisition/ourStory/fuji/desktop/mobile-0819.jpg" alt="Mobile">
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Feature 3 -->
+    <section class="feature">
+      <div class="feature-content">
+        <div class="feature-text">
+          <h2>Watch everywhere</h2>
+          <p>Stream unlimited movies and TV shows on your phone, tablet, laptop, and TV.</p>
+        </div>
+        <div class="feature-visual">
+          <img src="https://assets.nflxext.com/ffe/siteui/acquisition/ourStory/fuji/desktop/device-pile-in.png" alt="Devices">
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Feature 4 -->
+    <section class="feature">
+      <div class="feature-content reverse">
+        <div class="feature-text">
+          <h2>Create profiles for kids</h2>
+          <p>Send children on adventures with their favourite characters in a space made just for them—free with your membership.</p>
+        </div>
+        <div class="feature-visual">
+          <!-- I replaced the Doraemon image with the standard Kids image to keep the layout clean -->
+          <img src="https://assets.nflxext.com/ffe/siteui/acquisition/ourStory/fuji/desktop/kids.png" alt="Kids">
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      
+      <div class="accordion">
+        <!-- Item 1 -->
+        <div class="accordion-item">
+          <button class="accordion-btn">
+            What is StreamHub?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            <p>StreamHub is a streaming service that offers a wide variety of award-winning TV shows, movies, anime, documentaries and more – on thousands of internet-connected devices.<br><br>You can watch as much as you want, whenever you want without a single commercial – all for one low monthly price. There's always something new to discover and new TV shows and movies are added every week!</p>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="accordion-item">
+          <button class="accordion-btn">
+            How much does StreamHub cost?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            <p>Watch StreamHub on your smartphone, tablet, Smart TV, laptop, or streaming device, all for one fixed monthly fee. Plans range from ₹149 to ₹649 a month. No extra costs, no contracts.</p>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="accordion-item">
+          <button class="accordion-btn">
+            Where can I watch?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            <p>Watch anywhere, anytime. Sign in with your StreamHub account to watch instantly on the web at streamhub.com from your personal computer or on any internet-connected device that offers the StreamHub app, including smart TVs, smartphones, tablets, streaming media players and game consoles.</p>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="accordion-item">
+          <button class="accordion-btn">
+            How do I cancel?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            <p>StreamHub is flexible. There are no pesky contracts and no commitments. You can easily cancel your account online in two clicks. There are no cancellation fees – start or stop your account anytime.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="faq-cta">Ready to watch? Enter your email to create or restart your membership.</p>
+      <form class="email-form bottom-form" id="landingForm2">
+        <input type="email" placeholder="Email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-red btn-large">Get Started &gt;</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>Questions? Call <a href="#" style="color: #737373;">000-800-040-1843</a></p>
+      <div class="footer-links">
+        <a href="#">FAQ</a>
+        <a href="#">Help Centre</a>
+        <a href="#">Account</a>
+        <a href="#">Media Centre</a>
+        <a href="#">Investor Relations</a>
+        <a href="#">Jobs</a>
+        <a href="#">Ways to Watch</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Privacy</a>
+        <a href="#">Cookie Preferences</a>
+        <a href="#">Corporate Information</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Speed Test</a>
+        <a href="#">Legal Notices</a>
+        <a href="#">Only on StreamHub</a>
+      </div>
+      <select class="lang-select">
+        <option>English</option>
+        <option>हिन्दी</option>
+      </select>
+      <p>StreamHub India</p>
+      
+      <!-- Disclaimer for safety -->
+      <p class="legal-text">
+         StreamHub is a demo site for educational purposes only.<br>
+         This site is not affiliated with Netflix, Inc.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // --- FAQ ACCORDION LOGIC ---
+    document.querySelectorAll('.accordion-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.parentElement;
+        const content = button.nextElementSibling;
+
+        // Toggle active class on the clicked item
+        item.classList.toggle('active');
+
+        // Smooth height calculation
+        if (item.classList.contains('active')) {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+          content.style.maxHeight = 0;
+        }
+
+        // Optional: Close other items when one is opened (Accordion behavior)
+        // If you want multiple open at once, remove this block:
+        document.querySelectorAll('.accordion-item').forEach(otherItem => {
+          if (otherItem !== item && otherItem.classList.contains('active')) {
+            otherItem.classList.remove('active');
+            otherItem.querySelector('.accordion-content').style.maxHeight = 0;
+          }
+        });
+
+      });
+    });
+
+    // --- FORM SUBMISSION / REDIRECT LOGIC ---
+    function handleFormSubmit(event) {
+      event.preventDefault(); // Stop page reload
+      
+      const input = event.target.querySelector('input[type="email"]');
+      const email = input.value;
+
+      if(email) {
+        // Simulate logging in / creating account
+        alert(`Welcome to StreamHub! Please Login to continue: ${email}`);
+        
+        // Save email to LocalStorage so the Browse page knows you are logged in
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('isLoggedIn', 'true');
+
+        // Redirect to the Browse page
+        // Make sure that file is named 'signin.html' or update this link
+        window.location.href = 'signin.html';
+      }
+    }
+
+    // Attach listeners to both forms (top and bottom)
+    document.getElementById('landingForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('landingForm2').addEventListener('submit', handleFormSubmit);
+
+  </script>
+</body>
+
+
+</html>
